@@ -68,6 +68,9 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
 
   final List<Map<String, dynamic>> _pcrSuggestions = [];
 
+  final FocusNode _putOiFocusNode =
+      FocusNode(); // Add a focus node for 'Put OI'
+
   void _calculateSuggestion() {
     final double? callOiChange = double.tryParse(_callOiController.text);
     final double? putOiChange = double.tryParse(_putOiController.text);
@@ -129,7 +132,7 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
       _suggestion = newSuggestion;
       _reason = newReason;
 
-      // Clear text fields
+      // Clear text fields after a successful submission
       _callOiController.clear();
       _putOiController.clear();
     });
@@ -139,7 +142,10 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PCR Trading Suggestions'),
+        title: Text(
+          'One Rule One Tool!',
+          style: TextStyle(color: Colors.brown[200]),
+        ),
         backgroundColor: Colors.brown[800],
       ),
       body: Padding(
@@ -147,7 +153,6 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
             const SizedBox(height: 20),
             Row(
               children: [
@@ -158,29 +163,35 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration:
                         const InputDecoration(labelText: 'Call OI Change'),
+                    onSubmitted: (_) => FocusScope.of(context)
+                        .requestFocus(_putOiFocusNode), // Move to 'Put OI'
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
                     controller: _putOiController,
+                    focusNode: _putOiFocusNode,
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration:
                         const InputDecoration(labelText: 'Put OI Change'),
-                    onSubmitted: (_) => _calculateSuggestion(),
+                    onSubmitted: (_) =>
+                        _calculateSuggestion(), // Calculate on submit
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
             const SizedBox(height: 10),
+
+            // Display PCR value along with the reason
             Text(
-              'Reason: $_reason',
+              'PCR Value: ${_pcrValue?.toStringAsFixed(2) ?? "N/A"}\nReason: $_reason',
               style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.brown,
-                  fontStyle: FontStyle.italic),
+                fontSize: 16,
+                color: Colors.brown,
+                fontStyle: FontStyle.italic,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -302,24 +313,17 @@ class _TradingSuggestionPageState extends State<TradingSuggestionPage> {
                             height: 5,
                           ),
                           Container(
-                            padding: const EdgeInsets.all(2),
+                            padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
-                              border: Border.all(width: 0.5),
+                              color: Colors.brown[200],
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   suggestion['timestamp'],
-                                  style: const TextStyle(color: Colors.brown),
-                                ),
-                                Text(
-                                  'PCR: ${suggestion['pcr'].toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.brown),
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
